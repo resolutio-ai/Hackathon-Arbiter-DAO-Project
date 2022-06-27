@@ -12,6 +12,7 @@ import dispute from '../Integration/Artifacts/contracts/DisputePool.sol/Disputep
 const ComingSoon = (createDispute) => {
 
   async function createDispute(url) {
+    
     //Get the global metamask ethereum object from the browser
     const { ethereum } = window;
 
