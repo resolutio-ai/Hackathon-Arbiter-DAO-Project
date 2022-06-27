@@ -3,6 +3,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { jsPDF } from "jspdf";
 import { useCallback, useState } from "react";
 import AttachEvidence from "./AttachEvidence";
+import { createDispute } from "../../Integration/Implementations/DisputePool";
 
 import ReactPDF from '@react-pdf/renderer';
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
@@ -97,7 +98,10 @@ const DisputeResolutionForm = () => {
         fileArray
       )
       console.log(cid)
-      console.log(`https://ipfs.io/ipfs/${cid}`)
+      let Url = `https://ipfs.io/ipfs/${cid}`;
+      
+      await createDispute(Url);
+      
       if (cid) {
         clearForm();
       }
