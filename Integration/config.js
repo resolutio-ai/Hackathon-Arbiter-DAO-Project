@@ -1,3 +1,4 @@
-let disputePoolAddress = "0x4403eB3321add014Feb7991714ac8D138fE677Bb"
+let disputePoolAddress = ""
+const arbiterContractAddress = "0x6d9763d7CB4B642c898dd7B23fAa09609E953C56";
 
-export {disputePoolAddress}
+export {disputePoolAddress, arbiterContractAddress}
