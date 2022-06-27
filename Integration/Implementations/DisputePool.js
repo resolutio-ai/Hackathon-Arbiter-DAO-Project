@@ -14,9 +14,10 @@ async function createDispute(url) {
     }
 
     //Get wallet provider and signer
-    const provider = await new ethers.providers.Web3Provider(ethereum);
+    const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
-    const price = "60"
+    
+    const price = "0.1";
 
     //contract initialization: create an instance of the contract
     const disputePoolContract = new ethers.Contract(disputePoolAddress, dispute.abi, signer);
