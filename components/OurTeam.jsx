@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import Image from "next/image";
-import React from "react";
+import { PLACEHOLDER_BLUR } from "../constants/constants";
 import members from "../data/ourMembers.json";
 
 const OurTeam = () => {
@@ -15,24 +15,28 @@ const OurTeam = () => {
           flexWrap: "wrap",
         }}
       >
-        {members.map((member) => {
+        {members.map(({ id, profileURL, imageSrc, name }) => {
           return (
             <Box
               sx={{ mr: 2, textDecoration: "none" }}
-              key={member.id}
+              key={id}
               component="a"
-              href={member.profileURL}
+              href={profileURL}
               target="_blank"
             >
               <Image
-                src={member.imageSrc}
-                alt={member.name}
+                src={imageSrc}
+                alt={name}
                 width="150"
                 height="150"
                 objectFit="cover"
                 className="rounded"
+                placeholder="blur"
+                blurDataURL={PLACEHOLDER_BLUR}
               />
-              <Typography variant="h6" color="primary">{member.name}</Typography>
+              <Typography variant="h6" color="primary">
+                {name}
+              </Typography>
             </Box>
           );
         })}
