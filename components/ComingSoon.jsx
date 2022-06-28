@@ -3,11 +3,6 @@ import Image from "next/image";
 import React from "react";
 import { COMING_SOON_TEXT } from "../constants/strings";
 import comingSoonImage from "../public/coming_soon.svg";
-import { ethers } from "ethers";
-import {
-    disputePoolAddress
-} from '../Integration/config'
-import dispute from '../Integration/Artifacts/contracts/DisputePool.sol/Disputepool.json'
 
 const ComingSoon = (createDispute) => {
 
@@ -15,8 +10,7 @@ const ComingSoon = (createDispute) => {
     <Box
       sx={{ mx: "auto", mb: "2rem", textAlign: "center", maxWidth: "500px" }}
     >
-      <h1>{COMING_SOON_TEXT}</h1>
-      <button onClick={() => createDispute("url")}>click me to test dispute creation</button>
+      <h1>{COMING_SOON_TEXT}</h1>     
       <Image src={comingSoonImage} alt="coming Soon Image" />
     </Box>
   );
