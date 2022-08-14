@@ -1,34 +1,43 @@
 import { ethers } from "ethers";
-import {
-    disputePoolAddress
-} from '../config'
+import { disputeContract } from "../config";
 import dispute from '../Artifacts/contracts/DisputePool.sol/Disputepool.json'
 
 async function createDispute(url) {
-    //Get the global metamask ethereum object from the browser
-    const { ethereum } = window;
-
-    //if none is found, it means that a user does not  
-    if (!ethereum) {
-      return;
-    }
-
-    //Get wallet provider and signer
-    const provider = new ethers.providers.Web3Provider(ethereum);
-    const signer = provider.getSigner();
-    
     const price = "0.1";
-
-    //contract initialization: create an instance of the contract
-    const disputePoolContract = new ethers.Contract(disputePoolAddress, dispute.abi, signer);
-
-    //set the amount of Matic to be coolected
+    //set the amount of Matic to be collected
     const stake = ethers.utils.parseUnits(price, "ether");
 
     //call to the smartContract
-    const createDisputeTx = await disputePoolContract.createDispute(url, { value: stake });
+    const createDisputeTx = await disputeContract.createDispute(url, { value: stake });
+
     //Wait for transcation to be mined
     await createDisputeTx.wait();
   }
 
-  export {createDispute}
+  async function getAddress(disputeId) { 
+    //call to the smartContract
+    const addressesForADispute = await disputeContract.getAddress(disputeId);
+    return addressesForADispute;   
+  }
+
+  async function closeDispute(disputeId) {    
+    await disputeContract.closeDispute(disputeId);   
+  }
+
+  async function resolveDispute(disputeId, winner) {
+    //call to the smartContract
+    let txn = await disputeContract.resolveDispute(disputeId, winner); 
+    await txn.wait();
+  }
+
+  async function getRandomArbiters(disputeId){
+    //get random numbers from random cntract
+
+    let tx = await disputeContract.getRandomArbiters(0, 2, 4, disputeId);
+    await tx.wait();
+
+    let arbiters = await disputeContract.getAddAddress(1);
+    return arbiters;
+  }
+
+  export {createDispute, getRandomArbiters, resolveDispute, closeDispute, getAddress};

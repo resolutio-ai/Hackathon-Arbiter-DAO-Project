@@ -14,7 +14,7 @@ import { create } from "ipfs-http-client";
 import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 
-// const client = create('https://ipfs.infura.io:5001/api/v0');
+//const client = create('https://ipfs.infura.io:5001/api/v0');
 
 import { NFTStorage, File } from 'nft.storage'
 const client = new NFTStorage({
