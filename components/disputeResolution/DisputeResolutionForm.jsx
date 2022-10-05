@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import AttachEvidence from "./AttachEvidence";
-import { createDispute } from "../../Integration/Implementations/DisputePool";
+import { createDispute, DisputePool } from "../../Integration/Implementations/DisputePool";
 
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -100,7 +100,9 @@ const DisputeResolutionForm = () => {
       const cid = await client.storeDirectory(fileArray)      
       let Url = `https://ipfs.io/ipfs/${cid}`;
       
-      await createDispute(Url);
+      //The Dispute Pool file is now a class that exposes necessary code
+      // const disputePoolInstance = new DisputePool();
+      // await disputePoolInstance.createDispute(Url);
       
       if (cid) {
         clearForm();

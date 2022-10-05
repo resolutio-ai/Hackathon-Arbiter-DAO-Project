@@ -1,51 +1,189 @@
 import { ethers } from "ethers";
-import { disputeContract } from "../config";
-import dispute from "../Artifacts/contracts/DisputePool.sol/Disputepool.json";
+import DisputeSystem from "../Integrations/ABIs/DisputePool.json";
 
-async function createDispute(url) {
-  const price = "0.1";
-  //set the amount of Matic to be collected
-  const stake = ethers.utils.parseUnits(price, "ether");
+export class DisputePool {
+  stake = "0.02";
+  _UnInitialized = 0;
+  _IsCreated = 1;
+  _ArbiterSelection = 2;
+  _CanVote = 3;
+  _ComputeResult = 4;
+  _End = 5;
 
-  //call to the smartContract
-  const createDisputeTx = await disputeContract.createDispute(url, {
-    value: stake,
-  });
+  async _createDisputeSystemContractInstance() {
+    const { ethereum } = window;
 
-  //Wait for transcation to be mined
-  await createDisputeTx.wait();
+    //if none is found, it means that a user does not
+    if (!ethereum) {
+      return;
+    }
+
+    //Get wallet provider and signer
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    const signer = provider.getSigner();
+
+    //contract initialization: create and return an instance of the contract
+    return new ethers.Contract(DisputeSystemAddress, DisputeSystem.abi, signer);
+  }
+
+  _getStake = async () => ethers.utils.parseUnits(price, "ether");
+
+  //Create a dispute
+  async createDispute(uri) {
+    const price = this._getStake();
+    //Initialize
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let createDisputeTx = await contract.createDispute(uri, { value: price });
+    let response = await createDisputeTx.wait();
+    return response;
+  }
+
+  //Get all arbiters selected for a dispute
+  async getAddressesForDispute() {
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let response = await contract.getAddressesForDispute();
+    return response;
+  }
+
+  //Join a dispute pool
+  async joinDisputePool() {
+    let price = this._getStake();
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let txn = await contract.joinDisputePool(uri, { value: price });
+    let response = await txn.wait();
+
+    return response;
+  }
+
+  //Assign Random Arbiters
+  async assignRandomArbiters() {
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let txn = await contract.assignRandomArbiters();
+    let response = await txn.wait();
+
+    return response;
+  }
+
+  //Vote
+  async vote(proposal) {
+    //Where 1 = validate and 2 = invalidate
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let txn = await contract.vote(proposal);
+    let response = await txn.wait();
+
+    return response;
+  }
+
+  //End voting
+  async endVoting() {
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let txn = await contract.endVoting(uri);
+    let response = await txn.wait();
+
+    return response;
+  }
+
+  //Get All Disputes
+  async getAllDisputes() {
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let response = await contract.getAllDisputes();
+    return response;
+  }
+
+  //get a dispute
+  async getADispute(disputeId) {
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let response = await contract.getDispute(disputeId);
+    return response;
+  }
+
+  //Get all dispute created by userAddress
+  async getMyCreatedDisputes(userAddress) {
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let allDisputes = await contract.getAllDisputes();
+    let disputeArray = [];
+
+    for (let dispute of allDisputes) {
+      if (dispute.creator == userAddress) {
+        disputeArray.push(dispute);
+      }
+    }
+
+    return disputeArray;
+  }
+
+  //Get all disputes for an arbiter with userAddress
+  async getMyArbiterDisputes(userAddress) {
+    const contract = await this._createDisputeSystemContractInstance();
+    let allDisputes = await contract.getAllDisputes();
+    let disputeArray = [];
+
+    for (let dispute of allDisputes) {
+      if (dispute.selectedArbiters.includes(userAddress)) {
+        disputeArray.push(dispute);
+      }
+    }
+    return disputeArray;
+  }
+
+  //Get disputes that have just being newly created and Arbiter selection has not happened
+  async getNewDisputes() {
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let allDisputes = await contract.getAllDisputes();
+    let disputeArray = [];
+
+    for (let dispute of allDisputes) {
+      if (dispute.state == IsCreated) {
+        disputeArray.push(dispute);
+      }
+    }
+
+    return disputeArray;
+  }
+
+  //Get all disputes that are ongoing
+  async getOngoingDisputes(disputeId) {
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let allDisputes = await contract.getAllDisputes();
+    let disputeArray = [];
+
+    for (let dispute of allDisputes) {
+      if (
+        dispute.state == ArbiterSelection ||
+        dispute.state == CanVote ||
+        dispute.state == ComputeResult
+      ) {
+        disputeArray.push(dispute);
+      }
+    }
+
+    return disputeArray;
+  }
+
+  //Get all disputes that have been resolved
+  async getResolvedDisputes(disputeId) {
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let allDisputes = await contract.getAllDisputes();
+    let disputeArray = [];
+
+    for (let dispute of allDisputes) {
+      if (dispute.state == End) {
+        disputeArray.push(dispute);
+      }
+    }
+
+    return disputeArray;
+  }
 }
-
-async function getAddress(disputeId) {
-  //call to the smartContract
-  const addressesForADispute = await disputeContract.getAddress(disputeId);
-  return addressesForADispute;
-}
-
-async function closeDispute(disputeId) {
-  await disputeContract.closeDispute(disputeId);
-}
-
-async function resolveDispute(disputeId, winner) {
-  //call to the smartContract
-  let txn = await disputeContract.resolveDispute(disputeId, winner);
-  await txn.wait();
-}
-
-async function getRandomArbiters(disputeId) {
-  //get random numbers from random cntract
-
-  let tx = await disputeContract.getRandomArbiters(0, 2, 4, disputeId);
-  await tx.wait();
-
-  let arbiters = await disputeContract.getAddAddress(1);
-  return arbiters;
-}
-
-export {
-  createDispute,
-  getRandomArbiters,
-  resolveDispute,
-  closeDispute,
-  getAddress,
-};
