@@ -1,9 +1,14 @@
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers } from "ethers";
+import { useSnackbar } from "notistack";
 import { useCallback, useEffect, useReducer } from "react";
 import Web3Modal from "web3modal";
+import { verifyArbiter } from "../integrations/VerifyArbiter";
 
-import { web3InitialState, web3Reducer } from "../reducers/Web3Reducer";
+import {
+  resolutioInitialState,
+  resolutioReducer,
+} from "../reducers/ResolutioReducer";
 
 const providerOptions = {
   walletconnect: {
@@ -24,9 +29,11 @@ if (typeof window !== "undefined") {
   });
 }
 
-export const useWeb3 = () => {
-  const [state, dispatch] = useReducer(web3Reducer, web3InitialState);
-  const { provider, web3Provider, address, network } = state;
+export const useResolutio = () => {
+  const { enqueueSnackbar } = useSnackbar();
+  const [state, dispatch] = useReducer(resolutioReducer, resolutioInitialState);
+  const { provider, web3Provider, address, network, isLoggedIn, isArbiter } =
+    state;
 
   const connect = useCallback(async () => {
     if (web3Modal) {
@@ -36,7 +43,20 @@ export const useWeb3 = () => {
         const signer = web3Provider.getSigner();
         const address = await signer.getAddress();
         const network = await web3Provider.getNetwork();
-        //toast.success('Connected to Web3')
+        let isArbiter;
+        try {
+          isArbiter = await verifyArbiter(address);
+        } catch (error) {
+          console.log(error);
+          // Toast for incorrect network
+          enqueueSnackbar("Please set network to Polygon Mumbai Testnet", {
+            variant: "warning",
+          });
+          isArbiter = false;
+        }
+
+        // Toast for wallet connected
+        enqueueSnackbar("Connected to Web3 Wallet", { variant: "success" });
 
         dispatch({
           type: "SET_WEB3_PROVIDER",
@@ -44,6 +64,8 @@ export const useWeb3 = () => {
           web3Provider,
           address,
           network,
+          isLoggedIn: true,
+          isArbiter,
         });
       } catch (e) {
         console.log("connect error", e);
@@ -51,7 +73,7 @@ export const useWeb3 = () => {
     } else {
       console.error("No Web3Modal");
     }
-  }, []);
+  }, [enqueueSnackbar]);
 
   const disconnect = useCallback(async () => {
     if (web3Modal) {
@@ -59,14 +81,17 @@ export const useWeb3 = () => {
       if (provider?.disconnect && typeof provider.disconnect === "function") {
         await provider.disconnect();
       }
-      //toast.error('Disconnected from Web3')
+
+      // Toast for wallet disconnected
+      enqueueSnackbar("Disconnected from Web3 Wallet", { variant: "error" });
+
       dispatch({
         type: "RESET_WEB3_PROVIDER",
       });
     } else {
       console.error("No Web3Modal");
     }
-  }, [provider]);
+  }, [enqueueSnackbar, provider]);
 
   // Auto connect to the cached provider
   useEffect(() => {
@@ -78,11 +103,25 @@ export const useWeb3 = () => {
   // EIP-1193 events
   useEffect(() => {
     if (provider?.on) {
-      const handleAccountsChanged = (accounts) => {
-        // toast.info("Changed Web3 Account");
+      const handleAccountsChanged = async (accounts) => {
+        // Toast for wallet Changed
+        enqueueSnackbar("Changed Web3 Wallet Account", { variant: "info" });
+
+        let isArbiter;
+        try {
+          isArbiter = await verifyArbiter(accounts[0]);
+        } catch (error) {
+          console.log(error);
+          isArbiter = false;
+        }
+
         dispatch({
           type: "SET_ADDRESS",
           address: accounts[0],
+        });
+        dispatch({
+          type: "SET_ISARBITER",
+          isArbiter,
         });
       };
 
@@ -90,7 +129,9 @@ export const useWeb3 = () => {
       const handleChainChanged = (_hexChainId) => {
         if (typeof window !== "undefined") {
           console.log("switched to chain...", _hexChainId);
-          // toast.info("Web3 Network Changed");
+          // Toast for network Changed
+          enqueueSnackbar("Web3 Network Changed", { variant: "info" });
+
           window.location.reload();
         } else {
           console.log("window is undefined");
@@ -115,7 +156,7 @@ export const useWeb3 = () => {
         }
       };
     }
-  }, [provider, disconnect]);
+  }, [provider, disconnect, enqueueSnackbar]);
 
   return {
     provider,
@@ -124,5 +165,7 @@ export const useWeb3 = () => {
     network,
     connect,
     disconnect,
+    isLoggedIn,
+    isArbiter,
   };
 };

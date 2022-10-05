@@ -1,11 +1,13 @@
-export const web3InitialState = {
+export const resolutioInitialState = {
   provider: null,
   web3Provider: null,
   address: null,
   network: null,
+  isLoggedIn: false,
+  isArbiter: false,
 };
 
-export const web3Reducer = (state, action) => {
+export const resolutioReducer = (state, action) => {
   switch (action.type) {
     case "SET_WEB3_PROVIDER":
       return {
@@ -14,6 +16,8 @@ export const web3Reducer = (state, action) => {
         web3Provider: action.web3Provider,
         address: action.address,
         network: action.network,
+        isLoggedIn: action.isLoggedIn,
+        isArbiter: action.isArbiter,
       };
     case "SET_ADDRESS":
       return {
@@ -25,8 +29,18 @@ export const web3Reducer = (state, action) => {
         ...state,
         network: action.network,
       };
+    case "SET_LOGGEDIN":
+      return {
+        ...state,
+        isLoggedIn: action.isLoggedIn,
+      };
+    case "SET_ISARBITER":
+      return {
+        ...state,
+        isArbiter: action.isArbiter,
+      };
     case "RESET_WEB3_PROVIDER":
-      return web3InitialState;
+      return resolutioInitialState;
     default:
       throw new Error();
   }

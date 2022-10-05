@@ -1,9 +1,8 @@
-import { useWeb3Context } from "../context/Web3Context";
+import { useResolutioContext } from "../context/ResolutioContext";
 
 const RenderOnAnonymous = ({ children }) => {
-  const { web3Provider } = useWeb3Context();
-
-  return !web3Provider ? children : null;
+  const { isLoggedIn } = useResolutioContext();
+  return !isLoggedIn ? children : null;
 };
 
 export default RenderOnAnonymous;

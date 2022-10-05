@@ -1,8 +1,8 @@
 import { Box, Button, Grid, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import CountDownTimer from "../../components/CountDownTimer";
-import RenderOnAnonymous from "../../components/RenderOnAnonymous";
-import RenderOnAuthenticated from "../../components/RenderOnAuthenticated";
+import NotArbiter from "../../components/NotArbiter";
+import RenderOnArbiter from "../../components/RenderOnArbiter";
 import Meta from "../../components/seo/Meta";
 import SmartLink from "../../components/SmartLink";
 import Unauthorized from "../../components/Unauthorized";
@@ -14,7 +14,7 @@ const DisputeDetails = () => {
   return (
     <>
       <Meta title="Dispute Details" />
-      <RenderOnAuthenticated>
+      <RenderOnArbiter>
         <Box sx={{ textAlign: "center", mb: 10 }}>
           <Typography variant="h1">DA01</Typography>
           <Grid container spacing={2}>
@@ -66,10 +66,9 @@ const DisputeDetails = () => {
             </Button>
           </Box>
         </Box>
-      </RenderOnAuthenticated>
-      <RenderOnAnonymous>
-        <Unauthorized />
-      </RenderOnAnonymous>
+      </RenderOnArbiter>
+      <NotArbiter />
+      <Unauthorized />
     </>
   );
 };

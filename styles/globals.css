@@ -2,7 +2,6 @@
   border-radius: 125px;
 }
 
-
 html,
 body {
   height: 100vh;
@@ -20,4 +19,26 @@ body {
 
 .footer {
   flex-shrink: 0;
+}
+
+ul.resolutio {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+ul.resolutio li {
+  list-style: none;
+}
+
+ul.resolutio li::before {
+  /* Unicode for a bullet */
+  content: "\2022";
+  /* Styles for Indentation*/
+  color: #7e639e;
+  display: inline-block;
+  font-weight: bolder;
+  width: 1em;
+  font-size: 1.5em;
+  margin-left: 0.5em;
 }
