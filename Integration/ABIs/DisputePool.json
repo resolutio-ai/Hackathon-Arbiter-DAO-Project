@@ -3,11 +3,6 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "randomizer",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
         "name": "arbiterWhitelist",
         "type": "address"
       }
@@ -69,7 +64,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "uint256",
         "name": "disputeId",
         "type": "uint256"
@@ -95,6 +90,25 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "enum Disputepool.Decision",
         "name": "decision",
         "type": "uint8"
@@ -173,9 +187,32 @@
         "internalType": "uint256",
         "name": "id",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "randomvalues",
+        "type": "uint256[]"
       }
     ],
     "name": "assignRandomArbiters",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "move",
+        "type": "uint256"
+      }
+    ],
+    "name": "changeDisputeState",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -415,6 +452,26 @@
   },
   {
     "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "stake",
     "outputs": [
       {
@@ -424,6 +481,19 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

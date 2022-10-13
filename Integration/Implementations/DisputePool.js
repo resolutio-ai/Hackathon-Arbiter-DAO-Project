@@ -1,7 +1,10 @@
 import { ethers } from "ethers";
 import DisputeSystem from "../Integrations/ABIs/DisputePool.json";
+import Randomizer from "../Integrations/ABIs/Randomizer.json";
 
 export class DisputePool {
+  _disputeSystemAddress = "0x11673f267c39aa4D8F958E3C77fD54f0A60646a7";
+  _randomizerAddress = "0x15C89FAa1b28BA3D667F05aA871484254e01C9EE";
   stake = "0.02";
   _UnInitialized = 0;
   _IsCreated = 1;
@@ -9,6 +12,8 @@ export class DisputePool {
   _CanVote = 3;
   _ComputeResult = 4;
   _End = 5;
+  _forward = 1;
+  _backward = 2;
 
   async _createDisputeSystemContractInstance() {
     const { ethereum } = window;
@@ -23,7 +28,27 @@ export class DisputePool {
     const signer = provider.getSigner();
 
     //contract initialization: create and return an instance of the contract
-    return new ethers.Contract(DisputeSystemAddress, DisputeSystem.abi, signer);
+    return new ethers.Contract(
+      _disputeSystemAddress,
+      DisputeSystem.abi,
+      signer
+    );
+  }
+
+  async _createRandomizerInstance() {
+    const { ethereum } = window;
+
+    //if none is found, it means that a user does not
+    if (!ethereum) {
+      return;
+    }
+
+    //Get wallet provider and signer
+    const provider = new ethers.providers.Web3Provider(ethereum);
+    const signer = provider.getSigner();
+
+    //contract initialization: create and return an instance of the contract
+    return new ethers.Contract(_randomizerAddress, Randomizer.abi, signer);
   }
 
   _getStake = async () => ethers.utils.parseUnits(price, "ether");
@@ -48,42 +73,22 @@ export class DisputePool {
   }
 
   //Join a dispute pool
-  async joinDisputePool() {
+  async joinDisputePool(disputeId) {
     let price = this._getStake();
     const contract = await this._createDisputeSystemContractInstance();
 
-    let txn = await contract.joinDisputePool(uri, { value: price });
-    let response = await txn.wait();
-
-    return response;
-  }
-
-  //Assign Random Arbiters
-  async assignRandomArbiters() {
-    const contract = await this._createDisputeSystemContractInstance();
-
-    let txn = await contract.assignRandomArbiters();
+    let txn = await contract.joinDisputePool(disputeId, { value: price });
     let response = await txn.wait();
 
     return response;
   }
 
   //Vote
-  async vote(proposal) {
+  async vote(proposal, disputeId) {
     //Where 1 = validate and 2 = invalidate
     const contract = await this._createDisputeSystemContractInstance();
 
-    let txn = await contract.vote(proposal);
-    let response = await txn.wait();
-
-    return response;
-  }
-
-  //End voting
-  async endVoting() {
-    const contract = await this._createDisputeSystemContractInstance();
-
-    let txn = await contract.endVoting(uri);
+    let txn = await contract.vote(proposal, disputeId);
     let response = await txn.wait();
 
     return response;
@@ -113,7 +118,7 @@ export class DisputePool {
     let disputeArray = [];
 
     for (let dispute of allDisputes) {
-      if (dispute.creator == userAddress) {
+      if (dispute.creator.toString() === userAddress.toString()) {
         disputeArray.push(dispute);
       }
     }
@@ -186,4 +191,40 @@ export class DisputePool {
 
     return disputeArray;
   }
+
+  //ADMIN PRIVILEDGES
+
+  //Assign Random Arbiters
+  async assignRandomArbiters(disputeId, randomValues) {
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let txn = await contract.assignRandomArbiters(disputeId, randomValues);
+    let response = await txn.wait();
+
+    return response;
+  }
+
+  //End voting
+  async endVoting(disputeId) {
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let txn = await contract.endVoting(disputeId);
+    let response = await txn.wait();
+
+    return response;
+  }
+
+  //Change the state of a dispute
+  //For the move argument ,Pass Either 1 or 2 to this function
+  //1 means move forward and 2 move back ward
+  async changeDisputeState(disputeId, move) {
+    const contract = await this._createDisputeSystemContractInstance();
+
+    let txn = await contract.changeDisputeState(disputeId, move);
+    let response = await txn.wait();
+    return response;
+  }
+
+  //get Random Values
+  async getRandomValues() {}
 }
