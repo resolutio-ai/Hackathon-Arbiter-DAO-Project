@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { ARBITER_WHITELISTER_CONTRACT_ADDR } from "../config";
 import arbiter from "../contracts/ArbiterNFT/ArbiterNFT.json";
 
 const verifyArbiter = async (account_addr) => {
@@ -15,7 +16,7 @@ const verifyArbiter = async (account_addr) => {
 
   //contract initialization: create an instance of the contract
   const arbiterNFTContract = new ethers.Contract(
-    "0x6d9763d7CB4B642c898dd7B23fAa09609E953C56",
+    ARBITER_WHITELISTER_CONTRACT_ADDR,
     arbiter.abi,
     signer
   );

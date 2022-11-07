@@ -1,17 +1,22 @@
 import { ethers } from "ethers";
+import {
+  CHAINLINK_RANDOM_GENERATOR_CONTRACT_ADDR,
+  DISPUTE_INITIATION_CONTRACT_ADDR,
+} from "../config";
+import {
+  ARBITER_SELECTION,
+  CAN_VOTE,
+  COMPUTE_RESULT,
+  CREATED,
+  END,
+  STAKE,
+} from "../constants/constants";
 import DisputeSystem from "../contracts/DisputePool/DisputePool.json";
 import Randomizer from "../contracts/Randomizer/Randomizer.json";
 
-export class DisputePool {
-  _disputeSystemAddress = "0x11673f267c39aa4D8F958E3C77fD54f0A60646a7";
-  _randomizerAddress = "0x15C89FAa1b28BA3D667F05aA871484254e01C9EE";
-  stake = "0.02";
-  _UnInitialized = 0;
-  _IsCreated = 1;
-  _ArbiterSelection = 2;
-  _CanVote = 3;
-  _ComputeResult = 4;
-  _End = 5;
+class DisputePool {
+  _disputeSystemAddress = DISPUTE_INITIATION_CONTRACT_ADDR;
+  _randomizerAddress = CHAINLINK_RANDOM_GENERATOR_CONTRACT_ADDR;
   _forward = 1;
   _backward = 2;
 
@@ -51,7 +56,7 @@ export class DisputePool {
     return new ethers.Contract(_randomizerAddress, Randomizer.abi, signer);
   }
 
-  _getStake = async () => ethers.utils.parseUnits(price, "ether");
+  _getStake = async () => ethers.utils.parseUnits(STAKE, "ether");
 
   //Create a dispute
   async createDispute(uri) {
@@ -59,37 +64,37 @@ export class DisputePool {
     //Initialize
     const contract = await this._createDisputeSystemContractInstance();
 
-    let createDisputeTx = await contract.createDispute(uri, { value: price });
-    let response = await createDisputeTx.wait();
+    const createDisputeTx = await contract.createDispute(uri, { value: price });
+    const response = await createDisputeTx.wait();
     return response;
   }
 
   //Get all arbiters selected for a dispute
-  async getAddressesForDispute() {
+  async getAddressesForDispute(disputeId) {
     const contract = await this._createDisputeSystemContractInstance();
 
-    let response = await contract.getAddressesForDispute();
+    const response = await contract.getAddressesForDispute(disputeId);
     return response;
   }
 
   //Join a dispute pool
   async joinDisputePool(disputeId) {
-    let price = this._getStake();
+    const price = await this._getStake();
     const contract = await this._createDisputeSystemContractInstance();
 
-    let txn = await contract.joinDisputePool(disputeId, { value: price });
-    let response = await txn.wait();
+    const txn = await contract.joinDisputePool(disputeId, { value: price });
+    const response = await txn.wait();
 
     return response;
   }
 
   //Vote
   async vote(proposal, disputeId) {
-    //Where 1 = validate and 2 = invalidate
+    //Where proposal = 1 => validate and 2 => invalidate
     const contract = await this._createDisputeSystemContractInstance();
 
-    let txn = await contract.vote(proposal, disputeId);
-    let response = await txn.wait();
+    const txn = await contract.vote(proposal, disputeId);
+    const response = await txn.wait();
 
     return response;
   }
@@ -98,15 +103,15 @@ export class DisputePool {
   async getAllDisputes() {
     const contract = await this._createDisputeSystemContractInstance();
 
-    let response = await contract.getAllDisputes();
+    const response = await contract.getAllDisputes();
     return response;
   }
 
   //get a dispute
-  async getADispute(disputeId) {
+  async getDisputeById(disputeId) {
     const contract = await this._createDisputeSystemContractInstance();
 
-    let response = await contract.getDispute(disputeId);
+    const response = await contract.getDispute(disputeId);
     return response;
   }
 
@@ -114,87 +119,71 @@ export class DisputePool {
   async getMyCreatedDisputes(userAddress) {
     const contract = await this._createDisputeSystemContractInstance();
 
-    let allDisputes = await contract.getAllDisputes();
-    let disputeArray = [];
+    const allDisputes = await contract.getAllDisputes();
 
-    for (let dispute of allDisputes) {
-      if (dispute.creator.toString() === userAddress.toString()) {
-        disputeArray.push(dispute);
-      }
-    }
+    const userDisputes = allDisputes.filter(
+      (dispute) => dispute.creator === userAddress
+    );
 
-    return disputeArray;
+    return userDisputes;
   }
 
   //Get all disputes for an arbiter with userAddress
   async getMyArbiterDisputes(userAddress) {
     const contract = await this._createDisputeSystemContractInstance();
-    let allDisputes = await contract.getAllDisputes();
-    let disputeArray = [];
+    const allDisputes = await contract.getAllDisputes();
 
-    for (let dispute of allDisputes) {
-      if (dispute.selectedArbiters.includes(userAddress)) {
-        disputeArray.push(dispute);
-      }
-    }
-    return disputeArray;
+    const arbiterDisputes = allDisputes.filter((dispute) =>
+      dispute.selectedArbiters.includes(userAddress)
+    );
+
+    return arbiterDisputes;
   }
 
   //Get disputes that have just being newly created and Arbiter selection has not happened
   async getNewDisputes() {
     const contract = await this._createDisputeSystemContractInstance();
 
-    let allDisputes = await contract.getAllDisputes();
-    let disputeArray = [];
+    const allDisputes = await contract.getAllDisputes();
 
-    for (let dispute of allDisputes) {
-      if (dispute.state == IsCreated) {
-        disputeArray.push(dispute);
-      }
-    }
+    const newDisputes = allDisputes.filter(
+      (dispute) => dispute.state == CREATED
+    );
 
-    return disputeArray;
+    return newDisputes;
   }
 
   //Get all disputes that are ongoing
-  async getOngoingDisputes(disputeId) {
+  async getOngoingDisputes() {
     const contract = await this._createDisputeSystemContractInstance();
 
-    let allDisputes = await contract.getAllDisputes();
-    let disputeArray = [];
+    const allDisputes = await contract.getAllDisputes();
 
-    for (let dispute of allDisputes) {
-      if (
-        dispute.state == ArbiterSelection ||
-        dispute.state == CanVote ||
-        dispute.state == ComputeResult
-      ) {
-        disputeArray.push(dispute);
-      }
-    }
+    const ongoingDisputes = allDisputes.filter(
+      (dispute) =>
+        dispute.state == ARBITER_SELECTION ||
+        dispute.state == CAN_VOTE ||
+        dispute.state == COMPUTE_RESULT
+    );
 
-    return disputeArray;
+    return ongoingDisputes;
   }
 
   //Get all disputes that have been resolved
-  async getResolvedDisputes(disputeId) {
+  async getResolvedDisputes() {
     const contract = await this._createDisputeSystemContractInstance();
 
-    let allDisputes = await contract.getAllDisputes();
-    let disputeArray = [];
+    const allDisputes = await contract.getAllDisputes();
+    const resolvedDisputes = allDisputes.filter(
+      (dispute) => dispute.state == END
+    );
 
-    for (let dispute of allDisputes) {
-      if (dispute.state == End) {
-        disputeArray.push(dispute);
-      }
-    }
-
-    return disputeArray;
+    return resolvedDisputes;
   }
 
   //ADMIN PRIVILEDGES
 
-  //Assign Random Arbiters
+  //Assign Random Arbiters [4, 8, 2]
   async assignRandomArbiters(disputeId, randomValues) {
     const contract = await this._createDisputeSystemContractInstance();
 
@@ -226,5 +215,7 @@ export class DisputePool {
   }
 
   //get Random Values
-  async getRandomValues() {}
+  //async getRandomValues() {}
 }
+
+export default DisputePool;
