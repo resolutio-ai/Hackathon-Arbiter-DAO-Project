@@ -42,6 +42,27 @@ const pages = [
     isExternal: true,
     icon: <ForumIcon color="primary" />,
   },
+  {
+    id: 4,
+    text: "Disputes",
+    url: "https://discord.com/invite/24my5DbuS9",
+    isExternal: true,
+    icon: <ForumIcon color="primary" />,
+  },
+  {
+    id: 5,
+    text: "Arbiter DAO",
+    url: "https://discord.com/invite/24my5DbuS9",
+    isExternal: true,
+    icon: <ForumIcon color="primary" />,
+  },
+  {
+    id: 6,
+    text: "Resources",
+    url: "https://discord.com/invite/24my5DbuS9",
+    isExternal: true,
+    icon: <ForumIcon color="primary" />,
+  },
   // { id: 3, text: IMAGE_VERIFICATION_HEADING, url: "/image-verification" },
 ];
 
